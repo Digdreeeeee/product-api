@@ -11,21 +11,6 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1}).ok'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          --health-start-period 20s
-
-    env:
-      MONGO_URI: mongodb://localhost:27017/productdb_test
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,8 +24,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Start stack and wait for healthy
+        run: |
+          docker compose up -d --build --wait --wait-timeout 120
+          docker compose ps
+
       - name: Run CRUD tests against MongoDB
+        env:
+          MONGO_URI: mongodb://localhost:27017/productdb_test
         run: npm test
 
-      - name: Build Docker image
-        run: docker build -t product-api:ci .
+      - name: Smoke test running container
+        run: |
+          curl -fsS http://localhost:3000/health
+          curl -fsS -X POST http://localhost:3000/products \
+            -H "Content-Type: application/json" \
+            -d '{"pid":99,"pname":"CI","price":1,"quantity":1}'
+          curl -fsS http://localhost:3000/products/99
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
