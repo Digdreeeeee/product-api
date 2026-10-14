@@ -1,4 +1,16 @@
 services:
+  
+  watchtower:
+
+    image: nickfedor/watchtower
+    container_name: product-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 30
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
   mongodb:
     image: mongo:7
     container_name: product-mongodb-prod
@@ -14,6 +26,8 @@ services:
       start_period: 20s
 
   api:
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     image: anhkhoa203/product-api:latest
     container_name: product-api-prod
     restart: unless-stopped

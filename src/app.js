@@ -13,7 +13,7 @@ const productSchema = new mongoose.Schema({
 const Product = mongoose.model('Product', productSchema);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', db: mongoose.connection.readyState });
+  res.json({ status: 'ok', db: mongoose.connection.readyState, version: 'v2' });
 });
 
 app.post('/products', async (req, res) => {
