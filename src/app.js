@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 const productSchema = new mongoose.Schema({
   pid: { type: Number, required: true, unique: true },
