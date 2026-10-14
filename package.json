@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "node -e \"require('./src/app'); console.log('app loads OK')\""
   },
   "repository": {
     "type": "git",
